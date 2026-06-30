@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import shutil
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -108,7 +109,7 @@ def _check_upstream(upstream: str) -> None:
         url = url[:-3]
     request = urllib.request.Request(
         f"{url}/v1/models",
-        headers={"Authorization": "Bearer local"},
+        headers={"Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY', 'local')}"},
     )
     try:
         with urllib.request.urlopen(request, timeout=4) as response:
@@ -122,9 +123,17 @@ def run(upstream: str, host: str, port: int, skip_asset_check: bool) -> int:
     if not skip_asset_check and verify(["core"]):
         raise SystemExit("Core assets are incomplete. See `python groove.py prepare --help`.")
     _validate_model_config()
-    _check_upstream(upstream)
 
     env = os.environ
+    no_proxy = env.get("NO_PROXY", env.get("no_proxy", ""))
+    entries = [entry for entry in no_proxy.split(",") if entry]
+    for loopback in ("127.0.0.1", "localhost"):
+        if loopback not in entries:
+            entries.append(loopback)
+    env["NO_PROXY"] = ",".join(entries)
+    env["no_proxy"] = env["NO_PROXY"]
+    _check_upstream(upstream)
+
     env["HEADROOM_PYTHON_ONLY"] = "1"
     env["HEADROOM_OFFLINE"] = "1"
     env["HEADROOM_BINARIES_OFFLINE"] = "1"
@@ -141,13 +150,6 @@ def run(upstream: str, host: str, port: int, skip_asset_check: bool) -> int:
     env["HEADROOM_KOMPRESS_ONNX_FILENAME"] = "onnx/kompress-int8-wo.onnx"
     env["OPENAI_TARGET_API_URL"] = upstream.rstrip("/")
     env.setdefault("OPENAI_API_KEY", "local")
-    no_proxy = env.get("NO_PROXY", env.get("no_proxy", ""))
-    entries = [entry for entry in no_proxy.split(",") if entry]
-    for loopback in ("127.0.0.1", "localhost"):
-        if loopback not in entries:
-            entries.append(loopback)
-    env["NO_PROXY"] = ",".join(entries)
-    env["no_proxy"] = env["NO_PROXY"]
 
     argv = [
         sys.executable,
@@ -162,6 +164,11 @@ def run(upstream: str, host: str, port: int, skip_asset_check: bool) -> int:
         "--request-timeout-seconds",
         "600",
     ]
+    if os.name == "nt":
+        try:
+            return subprocess.call(argv, cwd=ROOT, env=dict(env))
+        except KeyboardInterrupt:
+            return 130
     os.execve(sys.executable, argv, env)
     return 0
 

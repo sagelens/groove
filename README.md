@@ -39,6 +39,45 @@ uv sync --extra proxy --extra code       # tree-sitter code parsing
 Do not use the `ml`, `pytorch-mps`, or `all` extras for this deployment. They
 pull the much larger PyTorch model path.
 
+#### Windows 10/11 without administrator access
+
+Use 64-bit Python 3.12 or 3.13 installed for your Windows user. Clone into a
+short, writable path such as `%USERPROFILE%\groove`; this keeps the manually
+staged Hugging Face cache below Windows' legacy path-length limit.
+
+From Command Prompt:
+
+```bat
+git clone git@github.com:sagelens/groove.git "%USERPROFILE%\groove"
+cd /d "%USERPROFILE%\groove"
+setup-windows.cmd
+```
+
+The setup script creates `.venv` inside the repository and runs
+`pip install -e ".[proxy]"` there. It does not modify system Python, write to
+Program Files, require Developer Mode, create privileged symlinks, install
+Rust, or contact Hugging Face. Python dependencies come only from PyPI;
+Headroom model assets remain a separate manual step.
+
+Continue with:
+
+```bat
+.venv\Scripts\python.exe groove.py prepare --model "qwen3:8b" --context-window 32768
+.venv\Scripts\python.exe groove.py verify
+run-windows.cmd
+```
+
+Pass a different endpoint when necessary:
+
+```bat
+run-windows.cmd --upstream http://127.0.0.1:4142 --port 8787
+```
+
+The checked dependency set provides Windows x64 wheels for ONNX Runtime,
+tiktoken, tokenizers, sqlite-vec, Magika and ast-grep; no local C/C++ or Rust
+compiler is used. On Windows ARM devices, install x64 Python and run under
+Windows' x64 emulation because the full native ARM wheel set is not available.
+
 ### 2. Prepare manual model destinations
 
 Get the exact model ID from your local endpoint:
