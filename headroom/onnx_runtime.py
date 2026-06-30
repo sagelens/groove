@@ -15,6 +15,7 @@ from typing import Any
 _PINNED_REVISIONS: dict[str, str] = {
     # chopratejas/kompress-v2-base @ 2026-06-10
     "chopratejas/kompress-v2-base": "b1563631b35bfdcee37587ad530147497d820d4c",
+    "answerdotai/ModernBERT-base": "8949b909ec900327062f0ebf497f51aef5e6f0c8",
     "chopratejas/technique-router-onnx": "27b0b4bfa510a1cff66d888072c0b807082721a8",
     "chopratejas/siglip-image-encoder-onnx": "d0a9fbd66d4bd8c761bff592d44831f7c2ae184e",
     # Third-party repo — pinning matters most here.
@@ -30,6 +31,11 @@ def _resolve_revision(repo_id: str, revision: str | None) -> str | None:
     if os.environ.get("HEADROOM_HF_PIN", "").strip().lower() in ("off", "0", "false", "no"):
         return None
     return _PINNED_REVISIONS.get(repo_id)
+
+
+def resolve_hf_revision(repo_id: str, revision: str | None = None) -> str | None:
+    """Resolve an explicit or repository-pinned Hugging Face revision."""
+    return _resolve_revision(repo_id, revision)
 
 
 def hf_hub_download_local_first(

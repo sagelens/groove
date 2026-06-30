@@ -1,0 +1,13 @@
+{
+  "openai": {
+    "context_limits": {
+      "replace-with-your-local-model-name": 32768
+    },
+    "pricing": {
+      "replace-with-your-local-model-name": [0, 0]
+    },
+    "encodings": {
+      "replace-with-your-local-model-name": "o200k_base"
+    }
+  }
+}

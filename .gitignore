@@ -3,6 +3,11 @@
 .fastembed_cache/
 **/.fastembed_cache/
 
+# Manually staged local model assets. Keep only their manifest and instructions.
+/resources/hf/
+/resources/tiktoken/
+/resources/config/models.json
+
 # Local Kompress ONNX export artifacts (scripts/export_kompress_v2_onnx.py).
 # Hundreds of MB each — published to HuggingFace, never committed.
 /onnx/

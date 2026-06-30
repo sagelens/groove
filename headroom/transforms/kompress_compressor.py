@@ -29,6 +29,7 @@ from ..config import TransformResult
 from ..onnx_runtime import (
     create_cpu_session_options,
     hf_hub_download_local_first,
+    resolve_hf_revision,
     trim_process_heap,
 )
 from ..tokenizer import Tokenizer
@@ -527,7 +528,9 @@ def _load_modernbert_tokenizer(auto_tokenizer: Any, *, allow_download: bool) -> 
     """Load the ModernBERT tokenizer, cache-only when ``allow_download`` is False."""
     try:
         return auto_tokenizer.from_pretrained(
-            "answerdotai/ModernBERT-base", local_files_only=not allow_download
+            "answerdotai/ModernBERT-base",
+            revision=resolve_hf_revision("answerdotai/ModernBERT-base"),
+            local_files_only=not allow_download,
         )
     except _NOT_CACHED_ERRORS as exc:
         if not allow_download:

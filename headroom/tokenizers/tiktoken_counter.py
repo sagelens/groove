@@ -16,6 +16,8 @@ import threading
 from functools import lru_cache
 from typing import Any
 
+from headroom.offline import is_offline
+
 from .base import BaseTokenizer
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,11 @@ class TiktokenLoadError(RuntimeError):
 
 # Encoding names whose bounded load already timed out — don't block on them again.
 _load_failed: set[str] = set()
+
+_OFFLINE_CACHE_KEYS = {
+    "o200k_base": "fb374d419588a4632f3f557e76b4b70aebbca790",
+    "cl100k_base": "9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+}
 
 
 def _load_timeout_seconds() -> float:
@@ -114,10 +121,17 @@ def _get_encoding(encoding_name: str):
     first timed-out encoding is remembered so later calls fail fast instead of
     re-blocking on every request.
     """
-    import tiktoken
-
     if encoding_name in _load_failed:
         raise TiktokenLoadError(f"tiktoken encoding {encoding_name!r} previously failed to load")
+
+    if is_offline():
+        cache_dir = os.environ.get("TIKTOKEN_CACHE_DIR")
+        cache_key = _OFFLINE_CACHE_KEYS.get(encoding_name)
+        if not cache_dir or not cache_key or not os.path.isfile(os.path.join(cache_dir, cache_key)):
+            _load_failed.add(encoding_name)
+            raise TiktokenLoadError(f"offline tiktoken cache is missing encoding {encoding_name!r}")
+
+    import tiktoken
 
     box: dict[str, Any] = {}
 

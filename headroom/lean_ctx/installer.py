@@ -172,6 +172,10 @@ def ensure_lean_ctx(version: str | None = None) -> Path | None:
     if existing:
         return existing
 
+    if os.environ.get("HEADROOM_BINARIES_OFFLINE"):
+        logger.info("lean-ctx not installed and binary downloads are disabled")
+        return None
+
     try:
         return download_lean_ctx(version)
     except RuntimeError as e:

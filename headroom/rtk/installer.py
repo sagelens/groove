@@ -216,6 +216,10 @@ def ensure_rtk(version: str | None = None) -> Path | None:
     if existing:
         return existing
 
+    if os.environ.get("HEADROOM_BINARIES_OFFLINE"):
+        logger.info("rtk not installed and binary downloads are disabled")
+        return None
+
     try:
         return download_rtk(version)
     except RuntimeError as e:

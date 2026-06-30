@@ -75,6 +75,7 @@ from typing import Any
 
 from ._ort import ensure_ort_dylib_pinned
 from ._version import __version__  # noqa: F401
+from .python_only import apply_python_only_env
 
 # Must run before anything can import `headroom._core`: on Windows the
 # Rust core resolves onnxruntime.dll at runtime (ort load-dynamic), and
@@ -82,6 +83,7 @@ from ._version import __version__  # noqa: F401
 # deadlocks ort session init (Win11 24H2+). Windows-gated, idempotent,
 # ~microseconds. See `headroom/_ort.py` for the full story.
 ensure_ort_dylib_pinned()
+apply_python_only_env()
 
 from .compress import CompressConfig, CompressResult, compress, compress_spreadsheet  # noqa: E402
 

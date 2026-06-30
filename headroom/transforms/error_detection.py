@@ -38,15 +38,20 @@ from __future__ import annotations
 import re
 from typing import cast
 
-from headroom._core import (
-    content_has_error_indicators as _rust_content_has_error_indicators,
-)
-from headroom._core import (
-    keyword_registry_snapshot as _rust_keyword_registry_snapshot,
-)
-from headroom._core import (
-    score_line as _rust_score_line,
-)
+try:
+    from headroom._core import (
+        content_has_error_indicators as _rust_content_has_error_indicators,
+    )
+    from headroom._core import (
+        keyword_registry_snapshot as _rust_keyword_registry_snapshot,
+    )
+    from headroom._core import (
+        score_line as _rust_score_line,
+    )
+except ImportError:
+    _rust_content_has_error_indicators = None
+    _rust_keyword_registry_snapshot = None
+    _rust_score_line = None
 
 
 def score_line(line: str, context: str = "text") -> tuple[str | None, float, float]:
@@ -62,13 +67,66 @@ def score_line(line: str, context: str = "text") -> tuple[str | None, float, flo
     ``#[pyfunction]``s; this shim translates that into the explicit
     Python error every caller would expect.
     """
-    result = _rust_score_line(line, context)
-    if result is None:
+    if context not in {"text", "search", "log", "diff"}:
         raise ValueError(f"unknown importance context: {context}")
-    return cast("tuple[str | None, float, float]", result)
+    if _rust_score_line is not None:
+        result = _rust_score_line(line, context)
+        if result is None:
+            raise ValueError(f"unknown importance context: {context}")
+        return cast("tuple[str | None, float, float]", result)
+
+    categories = [
+        ("error", ERROR_PATTERN, 0.95),
+        ("importance", IMPORTANCE_PATTERN, 0.6),
+    ]
+    if context == "diff":
+        categories.append(("security", SECURITY_PATTERN, 0.85))
+    else:
+        categories.append(("warning", WARNING_PATTERN, 0.75))
+    for category, pattern, priority in categories:
+        if pattern.search(line):
+            return category, priority, 0.7
+    if context == "text" and any(
+        line.startswith(prefix) for prefix in _REGISTRY["markdown_prefixes"]
+    ):
+        return "markdown", 0.45, 0.7
+    return None, 0.0, 0.0
 
 
-_REGISTRY: dict[str, list[str]] = _rust_keyword_registry_snapshot()
+_REGISTRY: dict[str, list[str]]
+if _rust_keyword_registry_snapshot is not None:
+    _REGISTRY = _rust_keyword_registry_snapshot()
+else:
+    _REGISTRY = {
+        "error": [
+            "error",
+            "exception",
+            "fail",
+            "failed",
+            "failure",
+            "fatal",
+            "critical",
+            "crash",
+            "panic",
+            "abort",
+            "timeout",
+            "denied",
+            "rejected",
+        ],
+        "warning": ["warn", "warning"],
+        "importance": ["important", "note", "todo", "fixme", "hack", "xxx", "bug", "fix"],
+        "security": ["security", "auth", "password", "secret"],
+        "markdown_prefixes": ["# ", "## ", "### ", "#### ", "**", "> "],
+        "error_indicators": [
+            "error",
+            "fail",
+            "exception",
+            "traceback",
+            "fatal",
+            "panic",
+            "crash",
+        ],
+    }
 
 
 def _alternation(words: list[str]) -> str:
@@ -142,7 +200,10 @@ def content_has_error_indicators(text: str) -> bool:
     Python tracebacks and similar substrings more than connection
     states.
     """
-    return bool(_rust_content_has_error_indicators(text))
+    if _rust_content_has_error_indicators is not None:
+        return bool(_rust_content_has_error_indicators(text))
+    lowered = text.lower()
+    return any(keyword in lowered for keyword in ERROR_INDICATOR_KEYWORDS)
 
 
 def content_has_strong_error_indicators(text: str) -> bool:

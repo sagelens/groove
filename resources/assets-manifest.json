@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "packs": {
+    "core": [
+      {
+        "name": "Kompress v2 INT8 ONNX",
+        "url": "https://huggingface.co/chopratejas/kompress-v2-base/resolve/b1563631b35bfdcee37587ad530147497d820d4c/onnx/kompress-int8-wo.onnx?download=true",
+        "destination": "hf/hub/models--chopratejas--kompress-v2-base/snapshots/b1563631b35bfdcee37587ad530147497d820d4c/onnx/kompress-int8-wo.onnx",
+        "size": 274049435,
+        "sha256": "c47ddd764dec5cf91fd1f10cf69e5538dd2a49d913828da7f6a993931cc7904f"
+      },
+      {
+        "name": "ModernBERT config",
+        "url": "https://huggingface.co/answerdotai/ModernBERT-base/resolve/8949b909ec900327062f0ebf497f51aef5e6f0c8/config.json?download=true",
+        "destination": "hf/hub/models--answerdotai--ModernBERT-base/snapshots/8949b909ec900327062f0ebf497f51aef5e6f0c8/config.json",
+        "size": 1193,
+        "sha256": "1609d59e627c33eaed524b4f01e546d42e84190a079a5a5ded84b212c41c324f"
+      },
+      {
+        "name": "ModernBERT tokenizer",
+        "url": "https://huggingface.co/answerdotai/ModernBERT-base/resolve/8949b909ec900327062f0ebf497f51aef5e6f0c8/tokenizer.json?download=true",
+        "destination": "hf/hub/models--answerdotai--ModernBERT-base/snapshots/8949b909ec900327062f0ebf497f51aef5e6f0c8/tokenizer.json",
+        "size": 2132967,
+        "sha256": "9fd55248d51d33976b324fc11592e28071da7d41e0e9401dfb7082e30574b7b1"
+      },
+      {
+        "name": "ModernBERT tokenizer config",
+        "url": "https://huggingface.co/answerdotai/ModernBERT-base/resolve/8949b909ec900327062f0ebf497f51aef5e6f0c8/tokenizer_config.json?download=true",
+        "destination": "hf/hub/models--answerdotai--ModernBERT-base/snapshots/8949b909ec900327062f0ebf497f51aef5e6f0c8/tokenizer_config.json",
+        "size": 20810,
+        "sha256": "3cd2017ff46d0a527e5d39cae39272eccfa1f19bb9f89b05d166aab2e38354e2"
+      },
+      {
+        "name": "ModernBERT special tokens",
+        "url": "https://huggingface.co/answerdotai/ModernBERT-base/resolve/8949b909ec900327062f0ebf497f51aef5e6f0c8/special_tokens_map.json?download=true",
+        "destination": "hf/hub/models--answerdotai--ModernBERT-base/snapshots/8949b909ec900327062f0ebf497f51aef5e6f0c8/special_tokens_map.json",
+        "size": 694,
+        "sha256": "ea97ecdbcc73713039d8d64dbb05e3689495c96657fbd9a18f5bed381be81049"
+      },
+      {
+        "name": "Tiktoken o200k_base",
+        "url": "https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken",
+        "destination": "tiktoken/fb374d419588a4632f3f557e76b4b70aebbca790",
+        "size": 3613922,
+        "sha256": "446a9538cb6c348e3516120d7c08b09f57c36495e2acfffe59a5bf8b0cfb1a2d"
+      },
+      {
+        "name": "Tiktoken cl100k_base",
+        "url": "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken",
+        "destination": "tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+        "size": 1681126,
+        "sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7"
+      }
+    ],
+    "memory": [
+      {
+        "name": "MiniLM memory encoder",
+        "url": "https://huggingface.co/Qdrant/all-MiniLM-L6-v2-onnx/resolve/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/model.onnx?download=true",
+        "destination": "hf/hub/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/model.onnx",
+        "size": 90387630,
+        "sha256": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5"
+      },
+      {
+        "name": "MiniLM memory tokenizer",
+        "url": "https://huggingface.co/Qdrant/all-MiniLM-L6-v2-onnx/resolve/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer.json?download=true",
+        "destination": "hf/hub/models--Qdrant--all-MiniLM-L6-v2-onnx/snapshots/5f1b8cd78bc4fb444dd171e59b18f3a3af89a079/tokenizer.json",
+        "size": 711661,
+        "sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0"
+      }
+    ],
+    "image": [
+      {
+        "name": "Image technique router",
+        "url": "https://huggingface.co/chopratejas/technique-router-onnx/resolve/27b0b4bfa510a1cff66d888072c0b807082721a8/model_quantized.onnx?download=true",
+        "destination": "hf/hub/models--chopratejas--technique-router-onnx/snapshots/27b0b4bfa510a1cff66d888072c0b807082721a8/model_quantized.onnx",
+        "size": 33975348,
+        "sha256": "c9b2fcc7431de3371bca8706ebcec43ceb096ae225cf086149e9b4f7b62305f6"
+      },
+      {
+        "name": "Image technique router tokenizer",
+        "url": "https://huggingface.co/chopratejas/technique-router-onnx/resolve/27b0b4bfa510a1cff66d888072c0b807082721a8/tokenizer.json?download=true",
+        "destination": "hf/hub/models--chopratejas--technique-router-onnx/snapshots/27b0b4bfa510a1cff66d888072c0b807082721a8/tokenizer.json",
+        "size": 711659,
+        "sha256": "41b9d12a4c559e4098f30173bc0f76d092c43d7b1f873e7027da45a256f30f87"
+      },
+      {
+        "name": "Image technique router config",
+        "url": "https://huggingface.co/chopratejas/technique-router-onnx/resolve/27b0b4bfa510a1cff66d888072c0b807082721a8/config.json?download=true",
+        "destination": "hf/hub/models--chopratejas--technique-router-onnx/snapshots/27b0b4bfa510a1cff66d888072c0b807082721a8/config.json",
+        "size": 840,
+        "sha256": "9ab85cc508b0b1107b581b9c4bea1087b9be8d64b9593136d1fbcdc2ac78865a"
+      },
+      {
+        "name": "SigLIP image encoder",
+        "url": "https://huggingface.co/chopratejas/siglip-image-encoder-onnx/resolve/d0a9fbd66d4bd8c761bff592d44831f7c2ae184e/image_encoder_int8.onnx?download=true",
+        "destination": "hf/hub/models--chopratejas--siglip-image-encoder-onnx/snapshots/d0a9fbd66d4bd8c761bff592d44831f7c2ae184e/image_encoder_int8.onnx",
+        "size": 99095554,
+        "sha256": "b0627132ef6965920a6c7f022d3881456489e756e0d5ee84652fd07a58c0e596"
+      },
+      {
+        "name": "SigLIP text embeddings",
+        "url": "https://huggingface.co/chopratejas/siglip-image-encoder-onnx/resolve/d0a9fbd66d4bd8c761bff592d44831f7c2ae184e/text_embeddings.npz?download=true",
+        "destination": "hf/hub/models--chopratejas--siglip-image-encoder-onnx/snapshots/d0a9fbd66d4bd8c761bff592d44831f7c2ae184e/text_embeddings.npz",
+        "size": 25618,
+        "sha256": "02424a0ecd6d0eb5b74466a6fb50d215bae1a52e5eba6cac73b6233810e53b73"
+      }
+    ],
+    "relevance": [
+      {
+        "name": "BGE relevance encoder",
+        "url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/52398278842ec682c6f32300af41344b1c0b0bb2/model_optimized.onnx?download=true",
+        "destination": "hf/hub/models--qdrant--bge-small-en-v1.5-onnx-q/snapshots/52398278842ec682c6f32300af41344b1c0b0bb2/model_optimized.onnx",
+        "size": 66465124,
+        "sha256": "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431"
+      },
+      {
+        "name": "BGE config",
+        "url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/52398278842ec682c6f32300af41344b1c0b0bb2/config.json?download=true",
+        "destination": "hf/hub/models--qdrant--bge-small-en-v1.5-onnx-q/snapshots/52398278842ec682c6f32300af41344b1c0b0bb2/config.json",
+        "size": 706,
+        "sha256": "13582bcf2effc85b7bf3d3f5532e686bc1c9ce86bb009d10f0ec33cbe92299dd"
+      },
+      {
+        "name": "BGE tokenizer",
+        "url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/52398278842ec682c6f32300af41344b1c0b0bb2/tokenizer.json?download=true",
+        "destination": "hf/hub/models--qdrant--bge-small-en-v1.5-onnx-q/snapshots/52398278842ec682c6f32300af41344b1c0b0bb2/tokenizer.json",
+        "size": 711396,
+        "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+      },
+      {
+        "name": "BGE tokenizer config",
+        "url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/52398278842ec682c6f32300af41344b1c0b0bb2/tokenizer_config.json?download=true",
+        "destination": "hf/hub/models--qdrant--bge-small-en-v1.5-onnx-q/snapshots/52398278842ec682c6f32300af41344b1c0b0bb2/tokenizer_config.json",
+        "size": 1242,
+        "sha256": "0b29c7bfc889e53b36d9dd3e686dd4300f6525110eaa98c76a5dafceb2029f53"
+      },
+      {
+        "name": "BGE special tokens",
+        "url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/52398278842ec682c6f32300af41344b1c0b0bb2/special_tokens_map.json?download=true",
+        "destination": "hf/hub/models--qdrant--bge-small-en-v1.5-onnx-q/snapshots/52398278842ec682c6f32300af41344b1c0b0bb2/special_tokens_map.json",
+        "size": 695,
+        "sha256": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a"
+      }
+    ]
+  }
+}

@@ -886,6 +886,11 @@ def _setup_serena_mcp(
     from headroom.mcp_registry import build_serena_spec, format_result
     from headroom.mcp_registry.base import RegisterStatus
     from headroom.mcp_registry.ledger import headroom_installed_matching, record_install
+    from headroom.offline import is_offline
+
+    if is_offline():
+        click.echo("  Serena MCP: offline mode forbids its GitHub/uvx install — skipping")
+        return
 
     if not registrar.detect():
         if verbose:

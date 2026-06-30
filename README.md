@@ -1,3 +1,192 @@
+## Groove: local-only Headroom without Rust
+
+This fork runs Headroom as a Python + ONNX proxy against an OpenAI-compatible
+LLM already listening on your machine. It is configured for:
+
+- upstream LLM: `http://127.0.0.1:4142`
+- Headroom proxy: `http://127.0.0.1:8787/v1`
+- no Rust compiler or native Headroom extension
+- no automatic Hugging Face or tiktoken downloads
+- immutable, manually staged model files with SHA-256 verification
+
+The upstream Headroom Rust crates remain in the repository for reference, but
+the Python package now builds with setuptools. In `HEADROOM_PYTHON_ONLY=1`
+mode, Rust-only JSON, search, log and diff routes use the local Kompress ONNX
+model. Content detection and tag/error protection use Python implementations.
+
+### 1. Install Python dependencies
+
+Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/) are recommended:
+
+```bash
+git clone git@github.com:sagelens/groove.git
+cd groove
+uv sync --extra proxy
+```
+
+This downloads Python packages from PyPI, but it neither installs Rust nor
+downloads model weights. For a machine without PyPI access, build a wheelhouse
+on another machine and install it with `uv pip install --no-index --find-links`.
+
+Optional Python dependencies:
+
+```bash
+uv sync --extra proxy --extra image      # image routing and OCR
+uv sync --extra proxy --extra relevance  # explicit embedding relevance scorer
+uv sync --extra proxy --extra code       # tree-sitter code parsing
+```
+
+Do not use the `ml`, `pytorch-mps`, or `all` extras for this deployment. They
+pull the much larger PyTorch model path.
+
+### 2. Prepare manual model destinations
+
+Get the exact model ID from your local endpoint:
+
+```bash
+curl http://127.0.0.1:4142/v1/models
+```
+
+Then create the model cache layout and model-limit configuration:
+
+```bash
+uv run python groove.py prepare \
+  --model 'qwen3:8b' \
+  --context-window 32768
+```
+
+Replace the model ID and context window with the values used by your server.
+Headroom cannot infer the real context window from the OpenAI API. An incorrect
+value leads to bad compression decisions.
+
+`prepare` prints one immutable URL and one exact destination for every file. It
+only creates directories; **it never downloads a model**. Download each URL
+with your browser or on another machine, then copy the file to the printed
+destination under `resources/`.
+
+Verify every byte before starting:
+
+```bash
+uv run python groove.py verify
+```
+
+The checksums, revisions, sizes and URLs live in
+[`resources/assets-manifest.json`](resources/assets-manifest.json).
+
+### Required core downloads
+
+| Resource | Revision | Files | Approx. size |
+|---|---|---|---:|
+| `chopratejas/kompress-v2-base` | `b1563631b35bfdcee37587ad530147497d820d4c` | `onnx/kompress-int8-wo.onnx` | 261 MiB |
+| `answerdotai/ModernBERT-base` | `8949b909ec900327062f0ebf497f51aef5e6f0c8` | tokenizer JSON files | 2.1 MiB |
+| OpenAI tiktoken | pinned by SHA-256 | `o200k_base`, `cl100k_base` | 5.1 MiB |
+
+Core total: approximately **269 MiB**, excluding Python packages and your
+generation LLM.
+
+The tiktoken files deliberately have hashed cache names:
+
+- `o200k_base.tiktoken` → `resources/tiktoken/fb374d419588a4632f3f557e76b4b70aebbca790`
+- `cl100k_base.tiktoken` → `resources/tiktoken/9b5ad71b2ce5302211f9c61530b329a4922fc6a4`
+
+### Optional manual packs
+
+Prepare and verify optional assets by repeating `--pack`:
+
+```bash
+uv run python groove.py prepare --pack core --pack memory --model 'qwen3:8b'
+uv run python groove.py verify --pack core --pack memory
+```
+
+| Pack | Resources | Additional size |
+|---|---|---:|
+| `memory` | `Qdrant/all-MiniLM-L6-v2-onnx` | 87 MiB |
+| `image` | technique router + SigLIP image encoder | 128 MiB |
+| `relevance` | `qdrant/bge-small-en-v1.5-onnx-q` | 64 MiB |
+
+All ONNX packs together are about **547 MiB**. RapidOCR's small OCR models are
+already contained in its Python wheel and require no separate HF download.
+
+### 3. Start the local proxy
+
+First start your LLM server on port `4142`. For Ollama, one option is:
+
+```bash
+OLLAMA_HOST=127.0.0.1:4142 ollama serve
+```
+
+Ollama model blobs are separate from Headroom assets. Transfer your existing
+`$OLLAMA_MODELS` directory, normally `~/.ollama/models`, or create an Ollama
+model from a manually copied GGUF file. Groove does not pull generation models.
+
+Start Groove:
+
+```bash
+uv run python groove.py run
+```
+
+The launcher:
+
+1. verifies every core asset and checksum;
+2. checks `http://127.0.0.1:4142/v1/models`;
+3. enables Hugging Face, Transformers, tiktoken and binary offline modes;
+4. selects Python content detection and the CPU ONNX backend;
+5. starts Headroom on `127.0.0.1:8787`.
+
+Point your OpenAI client or agent at Groove:
+
+```bash
+export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
+export OPENAI_API_KEY=local
+```
+
+Quick manual request:
+
+```bash
+curl http://127.0.0.1:8787/v1/chat/completions \
+  -H 'Authorization: Bearer local' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "qwen3:8b",
+    "messages": [{"role": "user", "content": "Reply with LOCAL_OK"}],
+    "stream": false
+  }'
+```
+
+The upstream must implement `/v1/models` and `/v1/chat/completions`. Streaming
+clients also need SSE streaming; tool-using agents need tool-call support.
+Codex additionally uses `/v1/responses`, so use an Ollama version that supports
+the Responses API and avoid stateful `previous_response_id` workflows.
+
+### Offline and no-Rust behavior
+
+The launcher fails closed when a core asset is missing or corrupt. It sets:
+
+```text
+HEADROOM_PYTHON_ONLY=1
+HEADROOM_OFFLINE=1
+HEADROOM_BINARIES_OFFLINE=1
+HEADROOM_REQUIRE_RUST_CORE=false
+HEADROOM_DETECT_BACKEND=python
+HF_HUB_OFFLINE=1
+TRANSFORMERS_OFFLINE=1
+```
+
+Offline mode also prevents RTK, lean-ctx, TokenSave and Serena installation.
+For the cleanest local deployment, use `groove.py run` directly rather than
+`headroom wrap`; wrappers modify external agent configuration and are not
+needed for a normal OpenAI-compatible client.
+
+Limitations versus the upstream native build:
+
+- Native SmartCrusher, SearchCompressor, LogCompressor, DiffCompressor and
+  TextCrusher are unavailable; Kompress handles those payloads instead.
+- Rust's faster content detector and tag walker are replaced with Python.
+- The local upstream remains reachable because loopback traffic is explicitly
+  allowed; all model discovery is cache-only.
+
+---
+
 <div align="center"><pre>
   ██╗  ██╗███████╗ █████╗ ██████╗ ██████╗  ██████╗  ██████╗ ███╗   ███╗
   ██║  ██║██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗██╔═══██╗████╗ ████║

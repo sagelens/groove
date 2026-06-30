@@ -55,6 +55,7 @@ from ..config import (
     is_tool_excluded,
 )
 from ..parser import CCR_RETRIEVAL_MARKER_RE
+from ..python_only import is_python_only
 from ..tokenizer import Tokenizer
 from .base import Transform
 from .content_detector import ContentType, DetectionResult
@@ -1475,6 +1476,16 @@ class ContentRouter(Transform):
         decision_reason = "strategy_not_enabled_or_unavailable"
         strategy_chain: list[str] = [strategy.value]
         error: str | None = None
+        python_only_reroute = is_python_only() and strategy in {
+            CompressionStrategy.SMART_CRUSHER,
+            CompressionStrategy.SEARCH,
+            CompressionStrategy.LOG,
+            CompressionStrategy.DIFF,
+        }
+        if python_only_reroute:
+            strategy = CompressionStrategy.KOMPRESS
+            actual_strategy = strategy
+            strategy_chain.append(strategy.value)
 
         try:
             if strategy == CompressionStrategy.CODE_AWARE:
@@ -1578,7 +1589,9 @@ class ContentRouter(Transform):
             elif strategy == CompressionStrategy.KOMPRESS:
                 compressed, compressed_tokens = self._try_ml_compressor(content, context, question)
                 compressor_name = "KompressCompressor"
-                decision_reason = "kompress"
+                decision_reason = (
+                    "python_only_reroute_to_kompress" if python_only_reroute else "kompress"
+                )
 
             elif strategy == CompressionStrategy.TEXT:
                 # Prefer Kompress ML compressor for text
